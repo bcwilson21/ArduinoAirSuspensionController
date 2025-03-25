@@ -3,7 +3,7 @@ sdkconfig.old
 sdkconfig
 
 .pio/
-components/
+components/arduino
 managed_components/
 
 # misc
