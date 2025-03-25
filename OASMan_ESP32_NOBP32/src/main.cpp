@@ -1,0 +1,83 @@
+// OASMan ESP32
+
+#include <Preferences.h> // have to include it here or it isn't found in the shared libs
+#include <user_defines.h>
+#include "input_type.h"
+#include "components/wheel.h"
+#include "components/compressor.h"
+#include "bitmaps.h"
+#include "manifoldSaveData.h"
+#include "airSuspensionUtil.h"
+#include "tasks/tasks.h"
+
+void setup()
+{
+    Serial.begin(SERIAL_BAUD_RATE);
+    beginSaveData();
+
+    delay(200); // wait for voltage stabilize
+
+    setupADCReadMutex();
+
+    Serial.println(F("Startup!"));
+
+    setupManifold();
+
+#if SCREEN_ENABLED == true
+
+#endif
+
+    delay(20);
+
+    pressureInputs[0] = pressureSensorInput0;
+    pressureInputs[1] = pressureSensorInput1;
+    pressureInputs[2] = pressureSensorInput2;
+    pressureInputs[3] = pressureSensorInput3;
+    pressureInputs[4] = pressureSensorInput4;
+
+    wheel[WHEEL_FRONT_PASSENGER] = new Wheel(manifold->get(FRONT_PASSENGER_IN), manifold->get(FRONT_PASSENGER_OUT), pressureInputs[getpressureInputFrontPassenger()], levelInputFrontPassenger, WHEEL_FRONT_PASSENGER);
+    wheel[WHEEL_REAR_PASSENGER] = new Wheel(manifold->get(REAR_PASSENGER_IN), manifold->get(REAR_PASSENGER_OUT), pressureInputs[getpressureInputRearPassenger()], levelInputRearPassenger, WHEEL_REAR_PASSENGER);
+    wheel[WHEEL_FRONT_DRIVER] = new Wheel(manifold->get(FRONT_DRIVER_IN), manifold->get(FRONT_DRIVER_OUT), pressureInputs[getpressureInputFrontDriver()], levelInputFrontDriver, WHEEL_FRONT_DRIVER);
+    wheel[WHEEL_REAR_DRIVER] = new Wheel(manifold->get(REAR_DRIVER_IN), manifold->get(REAR_DRIVER_OUT), pressureInputs[getpressureInputRearDriver()], levelInputRearDriver, WHEEL_REAR_DRIVER);
+
+    compressor = new Compressor(compressorRelayPin, pressureInputs[getpressureInputTank()]);
+
+    if (getlearnPressureSensors())
+    {
+        setlearnPressureSensors(false);
+        PressureSensorCalibration::learnPressureSensorsRoutine();
+        ESP.restart(); // reboot this bih
+    }
+
+    accessoryWireSetup();
+
+    // readProfile(getbaseProfile());// TODO: add functionality for this in the controller
+    readProfile(2);
+
+    setup_tasks();
+
+#if TEST_MODE == false
+    // only want to rise on start if it was a full boot and not a quick reboot
+    if (getinternalReboot() == false)
+    {
+        if (getriseOnStart() == true)
+        {
+            airUp();
+        }
+    }
+#endif
+
+    setinternalReboot(false);
+
+    Serial.println(F("Startup Complete"));
+}
+
+void loop()
+{
+    accessoryWireLoop();
+    if (getinternalReboot() == true)
+    {
+        ESP.restart();
+    }
+    delay(100);
+}

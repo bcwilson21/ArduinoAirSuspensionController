@@ -4,6 +4,8 @@
 
 #include "sdkconfig.h"
 
+#include "bp32.h"
+
 #include <Arduino.h>
 #include <Bluepad32.h>
 
@@ -267,7 +269,7 @@ void processControllers() {
 }
 
 // Arduino setup function. Runs in CPU 1
-void setup() {
+void bp32_setup() {
     Console.printf("Firmware: %s\n", BP32.firmwareVersion());
     const uint8_t* addr = BP32.localBdAddress();
     Console.printf("BD Addr: %2X:%2X:%2X:%2X:%2X:%2X\n", addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
@@ -303,7 +305,7 @@ void setup() {
 }
 
 // Arduino loop function. Runs in CPU 1.
-void loop() {
+void bp32_loop() {
     // This call fetches all the controllers' data.
     // Call this function in your main loop.
     bool dataUpdated = BP32.update();
