@@ -3,7 +3,7 @@ sdkconfig.old
 sdkconfig
 
 .pio/
-components/arduino
+# components/arduino # THIS IS A SUBMODULE BUT I DO NOT KNOW HOW TO LINK IT PROPERLY AT THE MOMENT WHOOPS
 managed_components/
 
 # misc
