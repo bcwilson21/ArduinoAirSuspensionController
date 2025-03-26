@@ -5,9 +5,11 @@
 
 #include <user_defines.h>
 #include "components/screen.h"
+#if USE_BLE == false
 #include "bluetooth/bt.h"
-#include "ota/ota.h"
+#endif
 #include "bluetooth/ble.h"
+#include "ota/ota.h"
 
 #if ENABLE_PS3_CONTROLLER_SUPPORT
 #include "bluetooth/ps3_controller.h"

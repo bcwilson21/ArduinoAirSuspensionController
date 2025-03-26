@@ -88,6 +88,7 @@ void task_wheel(void *parameters)
     }
 }
 
+extern bool startOTAServiceRequest;
 void task_ota(void *parameters)
 {
     delay(150);
