@@ -1,5 +1,6 @@
 set(srcs
-
+        "main.c"
+        "bp32.cpp"
         "airSuspensionUtil.cpp"
         "input_type.cpp"
         "manifoldSaveData.cpp"
