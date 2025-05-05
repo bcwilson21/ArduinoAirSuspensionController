@@ -664,7 +664,7 @@ void AIModel::print_weights() {
 
 
 #ifdef test_run
-int main() {
+int main2() {
     bool type = false;
     AIModel model;
     if (type) {
@@ -705,5 +705,48 @@ int main() {
     std::cout << "Predicted time 2: " << predicted_time2 << std::endl;
     model.print_weights(); // Optional: see the learned weights
 }
+
+//g++ -std=c++14 -Ilib/tiny-dnn -O3 src/pressureMath.cpp
+
+
+#include "tiny_dnn/tiny_dnn.h"
+using namespace tiny_dnn;
+using namespace tiny_dnn::activation;
+using namespace std;
+int main() {
+    // Define a neural network
+    network<sequential> net;
+
+    // Layer structure: 3 inputs → 8 hidden → 4 hidden → 1 output
+    net << fully_connected_layer(3, 8) << relu()
+        << fully_connected_layer(8, 4) << relu()
+        << fully_connected_layer(4, 1); // Output layer
+
+    // Training data (normalized inputs + outputs)
+    vector<vec_t> inputs;
+    vector<vec_t> targets;
+
+    // Replace this with your actual normalized data
+    inputs.push_back({0.05, 0.15, 0.55});  // normalized start, end, tank
+    targets.push_back({0.1});             // normalized time
+
+    // Training parameters
+    adagrad optimizer;
+
+    net.train<mse>(optimizer, inputs, targets, 
+                /*batch_size=*/8, 
+                /*epochs=*/200
+    );
+
+    // Predict new result
+    vec_t sample = {0.08, 0.18, 0.60}; // normalized
+    vec_t result = net.predict(sample);
+    std::cout << "Predicted time (normalized): " << result[0] << std::endl;
+
+    // Optionally denormalize the result here
+}
 #endif
+
+
+
 #endif
