@@ -12,7 +12,8 @@
 
 extern Adafruit_SSD1306 display; // defined in screen.cpp
 
-void drawPSIReadings();
 void drawsplashscreen();
+void drawPSIReadings();
+
 
 #endif

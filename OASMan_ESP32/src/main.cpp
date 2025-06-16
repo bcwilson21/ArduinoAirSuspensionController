@@ -9,13 +9,27 @@
 #include "manifoldSaveData.h"
 #include "airSuspensionUtil.h"
 #include "tasks/tasks.h"
+#include <TinyGPS++.h>
+#include <HardwareSerial.h>
+#include "components/screen.h"
 
 #include <SPIFFS.h>
+
+float g_gpsSpeedMph = 0.0;
+uint8_t g_gpsSatellites = 0;
+
+static TinyGPSPlus gps;
+
+#define GPS_RX_PIN 2
+#define GPS_TX_PIN 4
+
+bool startupDelayComplete = false;
 
 void setup()
 {
     Serial.begin(SERIAL_BAUD_RATE);
     Serial.println(F("Startup!"));
+    Serial1.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
 
     SPIFFS.begin(true);
     
@@ -97,6 +111,8 @@ void setup()
     //         delay(2);
     //     }
     // }
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+    
 }
 
 void loop()
@@ -107,4 +123,28 @@ void loop()
         ESP.restart();
     }
     delay(100);
+
+    while (Serial1.available()) {
+        gps.encode(Serial1.read());
+    }
+
+    if (gps.speed.isUpdated())
+    {
+        g_gpsSpeedMph = gps.speed.mph();
+    }
+
+    if (gps.satellites.isUpdated())
+    {
+        g_gpsSatellites = gps.satellites.value();
+    }
+
+    uint8_t sats = gps.satellites.value();
+    float speedMph = gps.speed.mph();
+
+    if (!startupDelayComplete) {
+        delay(10000);
+        startupDelayComplete = true;
+    }
+
+    drawPSIReadings();
 }
